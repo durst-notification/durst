@@ -1,0 +1,12 @@
+[package]
+name = "durst"
+version = "0.1.0"
+authors = ["Felix Buehler <account@buehler.rocks>"]
+edition = "2018"
+
+[dependencies]
+cairo-rs = "0.8.1"
+clap = "2.33.0"
+dbus = "0.8.1"
+serde = "1.0"
+serde_yaml = "0.8"
