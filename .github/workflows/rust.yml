@@ -1,0 +1,21 @@
+name: durst
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build durst
+      run: |
+        cargo build --verbose -p durst
+    - name: Build durstctl
+      run: |
+        cargo build --verbose -p durstctl
+    - name: Run durst tests
+      run: |
+        cargo test --verbose -p durst
+    - name: Run durstctl tests
+      run: |
+        cargo test --verbose -p durstctl
