@@ -1,21 +1,52 @@
-name: durst
+name: CI
 
 on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        os:
+          - ubuntu-16.04
+          - ubuntu-18.04
+        rust:
+          - stable
+          - beta
+          - nightly
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v1
-    - name: Build durst
-      run: |
-        cargo build --verbose -p durst
-    - name: Build durstctl
-      run: |
-        cargo build --verbose -p durstctl
-    - name: Run durst tests
-      run: |
-        cargo test --verbose -p durst
-    - name: Run durstctl tests
-      run: |
-        cargo test --verbose -p durstctl
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: environment
+      run: sudo apt-get install libdbus-1-dev
+
+    - name: toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+        components: rustfmt, clippy
+
+    - name: build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+
+    - name: test
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+
+    - name: format
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+
+    - name: lint
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: -- -D warnings
