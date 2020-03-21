@@ -5,8 +5,9 @@ authors = ["Felix Buehler <account@buehler.rocks>"]
 edition = "2018"
 
 [dependencies]
-cairo-rs = "0.8.1"
-clap = "2.33.0"
-dbus = "0.8.1"
-serde = "1.0"
+cairo-rs = "0.8"
+clap = "2.33"
+dbus = "0.8"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
