@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: checkout
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: environment
       run: sudo apt-get install libdbus-1-dev
@@ -39,14 +39,17 @@ jobs:
       with:
         command: test
 
+    # should be removed in the future, when generated code can be ignored
+    - name: toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+
     - name: format
       uses: actions-rs/cargo@v1
       with:
         command: fmt
         args: --all -- --check
-
-    - name: lint
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: -- -D warnings
