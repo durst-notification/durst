@@ -1,6 +1,7 @@
 mod interface;
 
 use dbus::arg;
+use dbus::blocking::LocalConnection;
 use dbus::tree;
 use std::time::Duration;
 
@@ -54,14 +55,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let f = tree::Factory::new_fn::<()>();
     let iface = interface::org_freedesktop_notifications_server(&f, (), |_m| &Notifications {});
 
-    let mut c = dbus::blocking::LocalConnection::new_session()?;
-    c.request_name("org.freedesktop.Notifications", false, true, false)?;
+    let mut c = LocalConnection::new_session()?;
 
-    let tree = f.tree(()).add(
-        f.object_path("/org/freedesktop/Notifications", ())
-            .introspectable()
-            .add(iface),
-    );
+    c.request_name("org.freedesktop.Notifications", false, true, true)?;
+
+    let tree = factory
+        .tree(())
+        // needed for introspectable of children
+        .add(factory.object_path("/", ()).introspectable())
+        .add(
+            factory
+                .object_path("/org/freedesktop/Notifications", ())
+                .introspectable()
+                .add(iface),
+        );
     tree.start_receive(&c);
 
     loop {
