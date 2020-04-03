@@ -1,11 +1,27 @@
 mod interface;
 
 use dbus::arg;
+use dbus::blocking::LocalConnection;
 use dbus::tree;
+use std::rc::Rc;
 use std::time::Duration;
 
+#[derive(Debug, Clone)]
+struct Notification {
+    pub app_name: String,
+    pub replaces_id: String,
+    pub app_icon: String,
+    pub summary: String,
+    pub body: String,
+    pub actions: String,
+    pub hints: String,
+    pub expire_timeout: String,
+}
+
 #[derive(Debug)]
-struct Notifications {}
+struct Notifications {
+    pub queue: Vec<Notification>,
+}
 
 type Err = tree::MethodErr;
 
@@ -51,17 +67,34 @@ impl interface::OrgFreedesktopNotifications for Notifications {
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let f = tree::Factory::new_fn::<()>();
-    let iface = interface::org_freedesktop_notifications_server(&f, (), |_m| &Notifications {});
+    let notifications_rc = Rc::new(Notifications { queue: Vec::new() });
 
-    let mut c = dbus::blocking::LocalConnection::new_session()?;
-    c.request_name("org.freedesktop.Notifications", false, true, false)?;
+    let factory = tree::Factory::new_fn::<()>();
+    let iface = interface::org_freedesktop_notifications_server(&factory, (), move |_| {
+        notifications_rc.clone()
+    });
 
-    let tree = f.tree(()).add(
-        f.object_path("/org/freedesktop/Notifications", ())
-            .introspectable()
-            .add(iface),
-    );
+    let mut c = LocalConnection::new_session()?;
+
+    let tmp = iface.get_name().clone();
+
+    c.request_name("org.freedesktop.Notifications", false, true, true)?;
+
+    let tree = factory
+        .tree(())
+        .add(
+            factory
+                .object_path("/", ())
+                // .introspectable()
+                .default_interface(tmp.clone()),
+        )
+        .add(
+            factory
+                .object_path("/org/freedesktop/Notifications", ())
+                .introspectable()
+                .add(iface)
+                .default_interface(tmp),
+        );
     tree.start_receive(&c);
 
     loop {
