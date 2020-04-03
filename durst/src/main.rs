@@ -1,4 +1,5 @@
 mod interface;
+mod notification;
 
 use dbus::arg;
 use dbus::blocking::LocalConnection;
@@ -6,8 +7,12 @@ use dbus::tree;
 use log::{debug, error, info, trace, warn};
 use std::time::Duration;
 
+use notification::Notification;
+
 #[derive(Debug)]
-struct Notifications {}
+struct Notifications {
+    pub queue: Vec<Notification>,
+}
 
 type Err = tree::MethodErr;
 
@@ -27,14 +32,18 @@ impl interface::OrgFreedesktopNotifications for Notifications {
         hints: ::std::collections::HashMap<&str, arg::Variant<Box<dyn arg::RefArg>>>,
         expire_timeout: i32,
     ) -> Result<u32, Err> {
-        println!("app_name {:?}", app_name);
-        println!("replaces_id {:?}", replaces_id);
-        println!("app_icon {:?}", app_icon);
-        println!("summary {:?}", summary);
-        println!("body {:?}", body);
-        println!("actions {:?}", actions);
-        println!("hints {:?}", hints);
-        println!("expire_timeout {:?}", expire_timeout);
+        let new_notification = Notification::new(
+            app_name,
+            replaces_id,
+            app_icon,
+            summary,
+            body,
+            actions,
+            hints,
+            expire_timeout,
+        );
+        debug!("notify {:?}", new_notification);
+        println!("{:?}", self.queue);
         Ok(42)
     }
     fn close_notification(&self, id: u32) -> Result<(), Err> {
