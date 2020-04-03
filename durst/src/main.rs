@@ -1,5 +1,6 @@
 mod interface;
 mod notification;
+mod test;
 
 use dbus::arg;
 use dbus::blocking::LocalConnection;
