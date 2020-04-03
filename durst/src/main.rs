@@ -5,6 +5,7 @@ use dbus::arg;
 use dbus::blocking::LocalConnection;
 use dbus::tree;
 use log::{debug, error, info, trace, warn};
+use std::rc::Rc;
 use std::time::Duration;
 
 use notification::Notification;
@@ -61,9 +62,21 @@ impl interface::OrgFreedesktopNotifications for Notifications {
     }
 }
 
+impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Notifications> {
+    fn as_ref(&self) -> &(dyn interface::OrgFreedesktopNotifications + 'static) {
+        &**self
+    }
+}
+
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let f = tree::Factory::new_fn::<()>();
-    let iface = interface::org_freedesktop_notifications_server(&f, (), |_m| &Notifications {});
+    let notifications_rc = Rc::new(Notifications {
+        queue: Vec::<Notification>::new(),
+    });
+
+    let factory = tree::Factory::new_fn::<()>();
+    let iface = interface::org_freedesktop_notifications_server(&factory, (), move |_| {
+        notifications_rc.clone()
+    });
 
     let mut c = LocalConnection::new_session()?;
 
