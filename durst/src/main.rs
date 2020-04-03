@@ -43,9 +43,9 @@ impl interface::OrgFreedesktopNotifications for Notifications {
     fn get_server_information(&self) -> Result<(String, String, String, String), Err> {
         println!("running getserverinformation");
         Ok((
-            "durst".to_string(),
+            env!("CARGO_PKG_NAME").to_string(),
             "durst-notification.org".to_string(),
-            "0.0.1".to_string(),
+            env!("CARGO_PKG_VERSION").to_string(),
             "1.2".to_string(),
         ))
     }
