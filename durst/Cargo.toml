@@ -3,6 +3,14 @@ name = "durst"
 version = "0.1.0"
 authors = ["Felix Buehler <account@buehler.rocks>"]
 edition = "2018"
+repository = "https://github.com/durst-notification/durst"
+homepage = "https://durst-notification.org"
+description = "dunst written in Rust"
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
+readme = "README.md"
 
 [dependencies]
 cairo-rs = "0.8"
@@ -14,3 +22,6 @@ serde_yaml = "0.8"
 
 [build-dependencies]
 dbus-codegen = "0.5"
+
+[dev-dependencies]
+env_logger = "0.7"
