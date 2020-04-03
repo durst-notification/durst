@@ -3,6 +3,7 @@ mod interface;
 use dbus::arg;
 use dbus::blocking::LocalConnection;
 use dbus::tree;
+use log::{debug, error, info, trace, warn};
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -12,7 +13,7 @@ type Err = tree::MethodErr;
 
 impl interface::OrgFreedesktopNotifications for Notifications {
     fn get_capabilities(&self) -> Result<Vec<String>, Err> {
-        println!("get_capabilities");
+        debug!("get_capabilities");
         Ok(vec!["asdf".to_string()])
     }
     fn notify(
@@ -37,11 +38,11 @@ impl interface::OrgFreedesktopNotifications for Notifications {
         Ok(42)
     }
     fn close_notification(&self, id: u32) -> Result<(), Err> {
-        println!("id {:?}", id);
+        debug!("close_notification {:?}", id);
         Ok(())
     }
     fn get_server_information(&self) -> Result<(String, String, String, String), Err> {
-        println!("running getserverinformation");
+        debug!("getserverinformation");
         Ok((
             env!("CARGO_PKG_NAME").to_string(),
             "durst-notification.org".to_string(),
