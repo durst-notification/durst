@@ -8,6 +8,7 @@ use dbus::tree;
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 use std::rc::Rc;
+use std::sync::Mutex;
 use std::time::Duration;
 
 use notification::Notification;
@@ -19,10 +20,10 @@ struct Notifications {
 
 type Err = tree::MethodErr;
 
-impl interface::OrgFreedesktopNotifications for Notifications {
+impl interface::OrgFreedesktopNotifications for Mutex<Notifications> {
     fn get_capabilities(&self) -> Result<Vec<String>, Err> {
         debug!("get_capabilities");
-        Ok(vec!["asdf".to_string()])
+        Ok(vec!["test".to_string()])
     }
     fn notify(
         &self,
@@ -46,8 +47,9 @@ impl interface::OrgFreedesktopNotifications for Notifications {
             expire_timeout,
         );
         debug!("notify {:?}", new_notification);
-        println!("{:?}", self.queue);
-        Ok(42)
+        let mut data = self.lock().unwrap();
+        (*data).queue.push(new_notification);
+        Ok((*data).queue.len() as u32)
     }
     fn close_notification(&self, id: u32) -> Result<(), Err> {
         debug!("close_notification {:?}", id);
@@ -64,20 +66,20 @@ impl interface::OrgFreedesktopNotifications for Notifications {
     }
 }
 
-impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Notifications> {
+impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Mutex<Notifications>> {
     fn as_ref(&self) -> &(dyn interface::OrgFreedesktopNotifications + 'static) {
         &**self
     }
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let notifications_rc = Rc::new(Notifications {
+    let notifications_rc = Rc::new(Mutex::new(Notifications {
         queue: Vec::<Notification>::new(),
-    });
+    }));
 
     let factory = tree::Factory::new_fn::<()>();
     let iface = interface::org_freedesktop_notifications_server(&factory, (), move |_| {
-        notifications_rc.clone()
+        Rc::clone(&notifications_rc)
     });
 
     let mut c = LocalConnection::new_session()?;
