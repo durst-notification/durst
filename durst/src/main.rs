@@ -5,6 +5,7 @@ mod test;
 use dbus::arg;
 use dbus::blocking::LocalConnection;
 use dbus::tree;
+#[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 use std::rc::Rc;
 use std::time::Duration;
