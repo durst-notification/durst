@@ -9,6 +9,7 @@ use dbus::blocking::LocalConnection;
 use dbus::tree;
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
+use std::env::var;
 use std::rc::Rc;
 use std::sync::Mutex;
 use std::time::Duration;
@@ -77,7 +78,10 @@ impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Mutex<Co
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let tmp = config::load_config("~/.config/durst/config.yaml".to_string());
+    let config_home = var("XDG_CONFIG_HOME")
+        .or_else(|_| var("HOME").map(|home| format!("{}/.config", home)))
+        .unwrap();
+    let tmp = config::load_config(format!("{}/durst/config.yaml", config_home));
 
     let container_rc = Rc::new(Mutex::new(Container {
         queue: Vec::<Notification>::new(),
