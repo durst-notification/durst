@@ -1,8 +1,10 @@
 use dbus::arg;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 #[derive(Debug)]
 pub struct Notification {
+    pub id: u32,
     pub app_name: String,
     pub replaces_id: String,
     pub app_icon: String,
@@ -12,6 +14,8 @@ pub struct Notification {
     pub hints: HashMap<String, arg::Variant<Box<dyn arg::RefArg>>>,
     pub expire_timeout: String,
 }
+
+static ID_COUNTER: AtomicU32 = AtomicU32::new(1);
 
 impl Notification {
     pub fn new(
@@ -24,6 +28,13 @@ impl Notification {
         hints: HashMap<&str, arg::Variant<Box<dyn arg::RefArg>>>,
         expire_timeout: i32,
     ) -> Self {
+        let id;
+        if replaces_id == 0 {
+            id = ID_COUNTER.fetch_add(1, Ordering::Relaxed)
+        } else {
+            // TODO: Ensure the replacement id is valid
+            id = replaces_id;
+        }
         // TODO make code clean
         // actions.map(String::from).collect()
         // actions.map(|s| s.to_string()).collect()
@@ -39,6 +50,7 @@ impl Notification {
         }
 
         Notification {
+            id: id,
             app_name: app_name.to_string(),
             replaces_id: replaces_id.to_string(),
             app_icon: app_icon.to_string(),
