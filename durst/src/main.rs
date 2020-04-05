@@ -104,6 +104,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
+    // Temporary logging setup
+    env_logger::init();
     if let Err(e) = run() {
         println!("{}", e);
     }
