@@ -1,3 +1,4 @@
+mod config;
 mod interface;
 mod notification;
 mod test;
@@ -12,16 +13,18 @@ use std::rc::Rc;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use config::Rule;
 use notification::Notification;
 
 #[derive(Debug)]
-struct Notifications {
-    pub queue: Vec<Notification>,
+struct Container {
+    queue: Vec<Notification>,
+    config: Vec<Rule>,
 }
 
 type Err = tree::MethodErr;
 
-impl interface::OrgFreedesktopNotifications for Mutex<Notifications> {
+impl interface::OrgFreedesktopNotifications for Mutex<Container> {
     fn get_capabilities(&self) -> Result<Vec<String>, Err> {
         debug!("get_capabilities");
         Ok(vec!["test".to_string()])
@@ -67,20 +70,23 @@ impl interface::OrgFreedesktopNotifications for Mutex<Notifications> {
     }
 }
 
-impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Mutex<Notifications>> {
+impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Mutex<Container>> {
     fn as_ref(&self) -> &(dyn interface::OrgFreedesktopNotifications + 'static) {
         &**self
     }
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let notifications_rc = Rc::new(Mutex::new(Notifications {
+    let tmp = config::load_config("~/.config/durst/config.yaml".to_string());
+
+    let container_rc = Rc::new(Mutex::new(Container {
         queue: Vec::<Notification>::new(),
+        config: tmp,
     }));
 
     let factory = tree::Factory::new_fn::<()>();
     let iface = interface::org_freedesktop_notifications_server(&factory, (), move |_| {
-        Rc::clone(&notifications_rc)
+        Rc::clone(&container_rc)
     });
 
     let mut c = LocalConnection::new_session()?;
