@@ -3,8 +3,8 @@ mod notification;
 mod test;
 
 use dbus::arg;
-use dbus::blocking::LocalConnection;
 use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
+use dbus::blocking::LocalConnection;
 use dbus::tree;
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
