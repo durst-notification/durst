@@ -4,6 +4,7 @@ mod test;
 
 use dbus::arg;
 use dbus::blocking::LocalConnection;
+use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
 use dbus::tree;
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
@@ -84,7 +85,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut c = LocalConnection::new_session()?;
 
-    c.request_name("org.freedesktop.Notifications", false, true, true)?;
+    let r = c.request_name("org.freedesktop.Notifications", false, true, true)?;
+    if r != RequestNameReply::PrimaryOwner {
+        panic!("Another notification daemon is running!");
+    }
 
     let tree = factory
         .tree(())
