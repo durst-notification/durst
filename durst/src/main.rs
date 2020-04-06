@@ -81,7 +81,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let config_home = var("XDG_CONFIG_HOME")
         .or_else(|_| var("HOME").map(|home| format!("{}/.config", home)))
         .unwrap();
-    let tmp = config::load_config(format!("{}/durst/config.yaml", config_home));
+    let tmp = config::load_config(format!("{}/durst/config.yml", config_home));
 
     let container_rc = Rc::new(Mutex::new(Container {
         queue: Vec::<Notification>::new(),
