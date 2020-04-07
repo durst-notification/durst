@@ -1,18 +1,19 @@
-mod config;
-mod interface;
-mod notification;
-mod test;
+#[macro_use]
+extern crate log;
 
 use dbus::arg;
 use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
 use dbus::blocking::LocalConnection;
 use dbus::tree;
-#[allow(unused_imports)]
-use log::{debug, error, info, trace, warn};
 use std::env::var;
 use std::rc::Rc;
 use std::sync::Mutex;
 use std::time::Duration;
+
+mod config;
+mod interface;
+mod notification;
+mod test;
 
 use config::Rule;
 use notification::Notification;
