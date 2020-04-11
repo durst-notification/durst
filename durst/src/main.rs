@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate clap;
 
 use dbus::arg;
 use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
@@ -9,6 +11,7 @@ use std::rc::Rc;
 use std::sync::Mutex;
 use std::time::Duration;
 
+mod cli;
 mod interface;
 mod notification;
 mod test;
@@ -109,8 +112,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
-    // Temporary logging setup
     env_logger::init();
+
+    let matches = cli::build_cli().get_matches();
+    if let Some(mode) = matches.value_of("mode") {
+        match mode {
+            "wayland" => println!("You are using wayland"),
+            "xorg" => println!("You are using xorg"),
+            "stdout" => println!("You are using stdout"),
+            _ => unreachable!(),
+        }
+    }
     if let Err(e) = run() {
         println!("{}", e);
     }
