@@ -14,7 +14,7 @@ readme = "README.md"
 
 [dependencies]
 cairo-rs = "0.8"
-clap = {version = "2.33", features = ["yaml"]}
+clap = "2.33"
 dbus = "0.8"
 log = "0.4"
 serde = { version = "1.0", features = ["derive"] }
