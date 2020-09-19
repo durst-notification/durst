@@ -23,3 +23,4 @@ env_logger = "0.7"
 
 [build-dependencies]
 dbus-codegen = "0.5"
+clap = "2.33"
