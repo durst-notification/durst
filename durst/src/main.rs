@@ -1,22 +1,22 @@
 #[macro_use]
-extern crate log;
-#[macro_use]
 extern crate clap;
-
-use dbus::arg;
-use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
-use dbus::blocking::LocalConnection;
-use dbus::tree;
-use std::env::var;
-use std::rc::Rc;
-use std::sync::Mutex;
-use std::time::Duration;
 
 mod cli;
 mod config;
 mod interface;
 mod notification;
 mod test;
+
+use dbus::arg;
+use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
+use dbus::blocking::LocalConnection;
+use dbus_tree as tree;
+#[allow(unused_imports)]
+use log::{debug, error, info, trace, warn};
+use std::env::var;
+use std::rc::Rc;
+use std::sync::Mutex;
+use std::time::Duration;
 
 use config::Rule;
 use notification::Notification;
@@ -97,7 +97,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         Rc::clone(&container_rc)
     });
 
-    let mut c = LocalConnection::new_session()?;
+    let c = LocalConnection::new_session()?;
 
     let r = c.request_name("org.freedesktop.Notifications", false, true, true)?;
     if r != RequestNameReply::PrimaryOwner {
