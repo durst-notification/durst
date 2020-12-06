@@ -128,7 +128,6 @@ fn main() {
     if let Some(mode) = matches.value_of("mode") {
         match mode {
             "wayland" => println!("You are using wayland"),
-            "xorg" => println!("You are using xorg"),
             "stdout" => println!("You are using stdout"),
             _ => unreachable!(),
         }

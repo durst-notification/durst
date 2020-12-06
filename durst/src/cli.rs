@@ -25,6 +25,6 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("force-output")
                 .short("o")
                 .takes_value(true)
-                .possible_values(&["wayland", "xorg", "stdout"]),
+                .possible_values(&["wayland", "stdout"]),
         )
 }
