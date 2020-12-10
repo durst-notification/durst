@@ -124,8 +124,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 fn main() {
     env_logger::init();
 
-    let matches = cli::build_cli().get_matches();
-    if let Some(mode) = matches.value_of("mode") {
+    let parsed_cli = cli::build_cli().get_matches();
+    if let Some(mode) = parsed_cli.value_of("mode") {
         match mode {
             "wayland" => println!("You are using wayland"),
             "stdout" => println!("You are using stdout"),
