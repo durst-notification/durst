@@ -7,6 +7,7 @@ mod interface;
 mod notification;
 mod test;
 
+use config::DurstConfiguration;
 use dbus::arg;
 use dbus::blocking::stdintf::org_freedesktop_dbus::RequestNameReply;
 use dbus::blocking::LocalConnection;
@@ -18,13 +19,12 @@ use std::rc::Rc;
 use std::sync::Mutex;
 use std::time::Duration;
 
-use config::Rule;
 use notification::Notification;
 
 #[derive(Debug)]
 struct Container {
     queue: Vec<Notification>,
-    config: Vec<Rule>,
+    config: DurstConfiguration,
 }
 
 type Err = tree::MethodErr;
@@ -81,15 +81,10 @@ impl AsRef<dyn interface::OrgFreedesktopNotifications + 'static> for Rc<Mutex<Co
     }
 }
 
-fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let config_home = var("XDG_CONFIG_HOME")
-        .or_else(|_| var("HOME").map(|home| format!("{}/.config", home)))
-        .unwrap();
-    let tmp = config::load_config(format!("{}/durst/config.yml", config_home));
-
+fn run(config: DurstConfiguration) -> Result<(), Box<dyn std::error::Error>> {
     let container_rc = Rc::new(Mutex::new(Container {
         queue: Vec::<Notification>::new(),
-        config: tmp,
+        config: config,
     }));
 
     let factory = tree::Factory::new_fn::<()>();
@@ -124,15 +119,23 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 fn main() {
     env_logger::init();
 
-    let matches = cli::build_cli().get_matches();
-    if let Some(mode) = matches.value_of("mode") {
+    let parsed_cli = cli::build_cli().get_matches();
+    if let Some(mode) = parsed_cli.value_of("mode") {
         match mode {
             "wayland" => println!("You are using wayland"),
             "stdout" => println!("You are using stdout"),
             _ => unreachable!(),
         }
     }
-    if let Err(e) = run() {
+
+    let config: DurstConfiguration;
+    if let Some(path) = parsed_cli.value_of("config-path") {
+        config = config::load_config_path(path.to_string());
+    } else {
+        config = config::load_config_default();
+    }
+
+    if let Err(e) = run(config) {
         println!("{}", e);
     }
 }
